@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<configuration doc:name="Configuration" doc:id="56376ee2-9cc9-4ff3-85ec-2b016b68ad6c" defaultErrorHandler-ref="global-error-handler" />
+	 <http:listener-config name="yoni-trades-file-sys-api-httpListenerConfig" basePath="yoni-trades-file-sys-api">
+        <http:listener-connection host="localhost" port="8081" />
+    </http:listener-config>
+    <apikit:config name="yoni-trades-file-sys-api-config" api="resource::977cb8a9-f0c9-4287-a339-ee3e71a73366:yoni-trades-file-sys-apiraml:1.0.0:raml:zip:yoni-trades-file-sys-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+   
+<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="b5210eb3-7604-4871-9d16-5d96417a804c" file="config/local.properties" key="${secure.key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="b2cb5103-c60e-4320-8da6-49950ce439cc" file="config/${env}.properties" />
+	<global-property doc:name="Global Property" doc:id="b97c5a26-91e0-423f-9d68-acc5fb1422da" name="env" value="local" />
+	
+<error-handler doc:id="4e35ffe6-ef46-4522-bc6c-38d25dc09244" name="global-error-handler">
+
+
+<on-error-propagate doc:id="0ac3d2de-b2c7-4400-bf49-3bb365954773" doc:name="On Error Propagate" logException="true" enableNotifications="true">
+
+<flow-ref doc:id="79e27a19-4f98-4a6c-a3d9-ede961f50a84" name="set-error-response-subflow" doc:name="set-error-response-subflow"/>
+
+</on-error-propagate>
+
+</error-handler>
+
+
+<sub-flow doc:id="0ad7ec17-4f84-4771-87e9-49bc4a22b69d" name="set-error-response-subflow">
+
+
+<ee:transform doc:id="f7422753-48ba-4efc-aa2b-82c677488e5f" doc:name="set error response">
+
+
+<ee:message>
+				<ee:set-payload resource="dw/errorPayload.dwl" />
+
+
+</ee:message>
+
+
+<ee:variables>
+
+
+		<ee:set-variable variableName="httpStatus"><![CDATA[%dw 2.0
+output application/json
+---
+(
+if (error.errorType.identifier=="BAD_REQUEST")
+400
+else if (error.errorType.identifier=="NOT_FOUND")
+404
+else if (error.errorType.identifier=="METHOD_NOT_ALLOWED")
+405
+else if (error.errorType.identifier=="NOT_ACCEPTABLE")
+406
+else if (error.errorType.identifier=="UNSUPPORTED_MEDIA_TYPE")
+415
+else if (error.errorType.identifier=="NOT_IMPLEMENTED")
+501
+else
+500
+)
+
+
+]]>
+</ee:set-variable>
+
+</ee:variables>
+
+</ee:transform>
+
+</sub-flow>
+</mule>

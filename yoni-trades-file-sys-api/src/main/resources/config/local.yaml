@@ -1,0 +1,7 @@
+db:
+  host:"DESKTOP-UV4BTV0"
+  user:"sa"
+  port:"1433"
+  instanceName:"MSSQLSERVER"
+  databaseName:"yoniDatabase"
+  password:"![XRzqYIR8hU+F1DoI+l+DHw==]"
