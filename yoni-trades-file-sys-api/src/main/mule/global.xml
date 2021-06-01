@@ -44,17 +44,8 @@ http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/sc
 
 
 <ee:message>
+				<ee:set-payload resource="dw/errorPayload.dwl" />
 
-
-<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-	message: "error occured",
-	error: {description: error.description,
-			errorType: error.errorType.asString}
-}]]>
-</ee:set-payload>
 
 </ee:message>
 
